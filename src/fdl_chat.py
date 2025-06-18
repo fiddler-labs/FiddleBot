@@ -149,17 +149,17 @@ class AsyncChatBot:
             utils.print(GOODBYE_MESSAGE)
             sys.exit(0)
 
-    async def get_llm_response(self, user_input: str) -> str:
+    async def get_llm_response(self, conversation_history: list) -> str:
         """Get response from OpenAI's GPT model asynchronously."""
         # Add user message to conversation history
-        user_message = utils.create_message(USER_ROLE, user_input)
-        self.conversation_history.append(user_message)
+        # user_message = utils.create_message(USER_ROLE, user_input)
+        # self.conversation_history.append(user_message)
 
         # Get response from OpenAI asynchronously
         with self.tracer.start_as_current_span(constants.LLM_RESPONSE) as llm_response:
             response = await self.client.chat.completions.create(
                 model=self.model_name,
-                messages=self.conversation_history,
+                messages=conversation_history,
                 max_tokens=MAX_TOKENS,
                 tools=self.available_tools,
                 tool_choice="auto",
@@ -173,7 +173,7 @@ class AsyncChatBot:
                 llm_response.set_attribute(
                     constants.TOOL_CHOICE, str(response.choices[0].message)
                 )
-                self.conversation_history.append(response.choices[0].message)
+                conversation_history.append(response.choices[0].message)
 
                 for tool_call in response.choices[0].message.tool_calls:
                     with self.tracer.start_as_current_span(
@@ -215,14 +215,14 @@ class AsyncChatBot:
                         TOOL_ROLE, tool_call_result, tool_call_id=tool_call_id
                     )
 
-                    self.conversation_history.append(tool_call_result_message)
+                    conversation_history.append(tool_call_result_message)
 
                 with self.tracer.start_as_current_span(
                     constants.LLM_TOOL_RESPONSE
                 ) as llm_tool_response:
                     response = await self.client.chat.completions.create(
                         model=self.model_name,
-                        messages=self.conversation_history,
+                        messages=conversation_history,
                         max_tokens=MAX_TOKENS,
                         session_id=self.session_id,
                     )
@@ -234,9 +234,14 @@ class AsyncChatBot:
                 llm_response.set_attribute(constants.AI_RESPONSE, ai_response)
 
         assistant_message = utils.create_message(ASSISTANT_ROLE, ai_response)
-        self.conversation_history.append(assistant_message)
+        conversation_history.append(assistant_message)
 
-        return ai_response
+        return conversation_history
+
+    def get_system_message(self):
+        """Get the system message for the chatbot"""
+        system_message = utils.create_message(SYSTEM_ROLE, self.system_prompt)
+        return system_message
 
     async def start_chat(self):
         """Start the async chat loop."""
@@ -244,6 +249,8 @@ class AsyncChatBot:
             f"Welcome to FiddleBot! Type {', '.join(EXIT_COMMANDS)} to end the conversation."
         )
         utils.print("Type your message and press Enter to chat with the AI.")
+        system_message = self.get_system_message()
+        conversation_history = [system_message]
 
         with self.tracer.start_as_current_span(constants.CHAT_LOOP) as chat_loop:
             chat_loop.set_attribute(constants.SYSTEM_PROMPT, self.system_prompt)
@@ -256,8 +263,12 @@ class AsyncChatBot:
                     utils.print(GOODBYE_MESSAGE)
                     sys.exit(0)
 
-                response = await self.get_llm_response(user_input)
-                utils.print(f"{AI_RESPONSE_PROMPT}{response}")
+                user_message = utils.create_message(USER_ROLE, user_input)
+                conversation_history.append(user_message)
+
+                conversation_history = await self.get_llm_response(conversation_history)
+                ai_response = conversation_history[-1][constants.CONTENT]
+                utils.print(f"{AI_RESPONSE_PROMPT}{ai_response}")
 
 
 async def main():

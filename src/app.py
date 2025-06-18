@@ -59,6 +59,14 @@ def load_chatbot(server_script_path):
 
 fdl_chatbot = load_chatbot(mcp_server_path)
 
+if constants.ST_CONVERSATION_HISTORY not in st.session_state:
+    system_message = fdl_chatbot.get_system_message()
+    conversation_history = [system_message]
+    st.session_state[constants.ST_CONVERSATION_HISTORY] = conversation_history
+else:
+    conversation_history = st.session_state[constants.ST_CONVERSATION_HISTORY]
+
+
 st.title(constants.ST_TITLE)
 
 config = {
@@ -86,9 +94,23 @@ try:
 except Exception as e:
     st.error(f"Error: {e}")
 
-
 auth_status = st.session_state.get(constants.ST_AUTH_STATUS)
 if auth_status:
+    with st.sidebar:
+        st.write("FiddleBot is a chatbot that can help you with your questions.")
+        st.write("FiddleBot has access the following capabilities via tools:")
+        st.markdown(
+            """
+            - list all projects in fiddler
+            - list all models in a project
+            - get model schema
+            - get model specs
+            - list alert rules for a model
+            - list triggered alerts for a rule
+            - list all custom metrics for a model
+            """
+        )
+
     if constants.ST_MESSAGES not in st.session_state:
         st.session_state[constants.ST_MESSAGES] = []
 
@@ -104,6 +126,8 @@ if auth_status:
 
     prompt = st.chat_input("What can FiddleBot help you with?")
     if prompt is not None:
+        user_message = utils.create_message(constants.USER_ROLE, prompt)
+        conversation_history.append(user_message)
 
         ## Show user message on screen
         with st.chat_message(constants.ST_USER_ROLE):
@@ -122,7 +146,7 @@ if auth_status:
 
         with st.spinner("Thinking..."):
             task_key = f"task-{gen_key(prompt)}"
-            schedule_task(task_key, fdl_chatbot.get_llm_response(prompt))
+            schedule_task(task_key, fdl_chatbot.get_llm_response(conversation_history))
             process_tasks()
 
         if task_key in tasks:
@@ -130,7 +154,8 @@ if auth_status:
 
             if task.done():
                 ## Path is relative to the directory from where the app is run
-                response = task.result()
+                conversation_history = task.result()
+                response = conversation_history[-1][constants.CONTENT]
                 with st.chat_message(
                     constants.ST_FDL_ROLE, avatar=constants.ST_ICON_PATH
                 ):
@@ -142,6 +167,7 @@ if auth_status:
             constants.ST_CONTENT: response,
         }
         st.session_state[constants.ST_MESSAGES].append(fdl_message)
+        st.session_state[constants.ST_CONVERSATION_HISTORY] = conversation_history
 elif auth_status is False:
     st.error("Invalid Credentials")
 else:

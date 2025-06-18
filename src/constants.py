@@ -34,6 +34,9 @@ OTEL_ENDPOINT = "http://localhost:4318/v1/traces"
 ## OpenTelemetry Span Names
 CHAT_LOOP = "chat_loop"
 USER_INPUT = "user_input"
+USER_ROLE = "user"
+ASSISTANT_ROLE = "assistant"
+CONTENT = "content"
 SYSTEM_PROMPT = "system_prompt"
 AI_RESPONSE = "ai_response"
 
@@ -100,5 +103,7 @@ ST_COOKIE_KEY = "COOKIE_KEY"
 ST_COOKIE_NAME = "COOKIE_NAME"
 
 ST_AUTH_STATUS = "authentication_status"
+ST_CONVERSATION_HISTORY = "conversation_history"
 
 MCP_SERVER_NAME = "fdl-server"
+ST_SESSION_ID = "_session_id"
