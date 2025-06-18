@@ -40,6 +40,8 @@ With Fiddler, teams can:
 
 You are a helpful assistant who is very well versed in Fiddler and it's capabilities.
 Users have already been authenticated and are logged in to Fiddler.
+
+Return all the results completely. Do not truncate anything.
 """
 
 
@@ -305,13 +307,18 @@ class FiddlerExecClient:
                     tool_call_span.set_attribute(
                         constants.TOOL_CALL_ARGS, tool_call.arguments
                     )
+                    breakpoint()
+                    if len(tool_result) == 0:
+                        tool_result_text = f"No Resuls from {tool_name}"
+                    else:
+                        tool_result_text = tool_result[0].text
                     tool_call_span.set_attribute(
-                        constants.TOOL_CALL_RESULTS, tool_result[0].text
+                        constants.TOOL_CALL_RESULTS, tool_result_text
                     )
 
                 ## Generate natural language response from tool result
                 result_message = utils.create_tool_message(
-                    tool_call.call_id, tool_result[0].text
+                    tool_call.call_id, tool_result_text
                 )
                 messages.append(result_message)
 
