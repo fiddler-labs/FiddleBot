@@ -307,7 +307,6 @@ class FiddlerExecClient:
                     tool_call_span.set_attribute(
                         constants.TOOL_CALL_ARGS, tool_call.arguments
                     )
-                    breakpoint()
                     if len(tool_result) == 0:
                         tool_result_text = f"No Resuls from {tool_name}"
                     else:
