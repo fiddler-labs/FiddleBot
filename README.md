@@ -62,6 +62,11 @@ uv run src/fdl_chat.py src/fdl_mcp_server.py
 - Type `q`, `quit`, or `exit` to end the conversation
 - Press Ctrl+C to exit at any time
 
+Run the streamlit chatbot with
+```bash
+uv run streamlit run src/app.py
+```
+
 ### Usage with OpenTelemetry 
 
 #### Console Export of OTEL Spans to Console
