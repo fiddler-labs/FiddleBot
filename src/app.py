@@ -6,8 +6,6 @@ import nest_asyncio
 import streamlit as st
 import streamlit_authenticator as stauth
 
-from yaml.loader import SafeLoader
-
 import utils
 import fdl_chat
 import constants
