@@ -1,0 +1,24 @@
+[project]
+name = "fdl-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=2.8.0",
+    "fiddler-client>=3.8.3",
+    "google-genai>=1.15.0",
+    "httpx>=0.28.1",
+    "jupyter>=1.1.1",
+    "lab>=8.4",
+    "langfuse>=2.60.8",
+    "mcp[cli]>=1.7.0",
+    "openai>=1.76.2",
+    "opentelemetry-distro[otlp]>=0.54b1",
+    "opentelemetry-exporter-otlp-proto-http>=1.33.1",
+    "opentelemetry-instrumentation>=0.54b1",
+    "python-dotenv>=1.1.0",
+    "streamlit>=1.45.1",
+    "streamlit-authenticator>=0.4.2",
+    "watchdog>=6.0.0",
+]
