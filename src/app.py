@@ -49,7 +49,7 @@ else:
     mcp_server_path = sys.argv[1]
 
 
-@st.cache_resource
+# @st.cache_resource
 def load_chatbot(server_script_path):
     utils.print("Loading chatbot")
     fdl_chatbot = fdl_chat.AsyncChatBot(server_script_path=server_script_path)
