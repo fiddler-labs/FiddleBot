@@ -54,8 +54,11 @@ def get_model(project_name: str, model_name: str):
         project_name: Name of project
         model_name: Name of model
     """
-    project = fdl.Project.from_name(name=project_name)
-    model = fdl.Model.from_name(name=model_name, project_id=project.id)
+    try:
+        project = fdl.Project.from_name(name=project_name)
+        model = fdl.Model.from_name(name=model_name, project_id=project.id)
+    except Exception as e:
+        return "Error in obtaining model"
     return model
 
 
@@ -66,8 +69,11 @@ def list_all_projects() -> list[str]:
     """
     print("Listing all projects")
     project_names = []
-    for project in fdl.Project.list():
-        project_names.append(str(project.name))
+    try:
+        for project in fdl.Project.list():
+            project_names.append(str(project.name))
+    except Exception as e:
+        return "Error in obtaining projects"
     return project_names
 
 
@@ -79,10 +85,13 @@ def list_models_in_project(project_name: str) -> list[str]:
     Args:
         project_name: Name of the project
     """
-    project = fdl.Project.from_name(name=project_name)
-    model_names = []
-    for model in project.models:
-        model_names.append(str(model.name))
+    try:
+        project = fdl.Project.from_name(name=project_name)
+        model_names = []
+        for model in project.models:
+            model_names.append(str(model.name))
+    except Exception as e:
+        return "Error in obtaining models"
     return model_names
 
 
@@ -94,8 +103,11 @@ def get_model_schema(project_name: str, model_name: str):
         project_name: Name of the project
         model_name: Name of the model
     """
-    model = get_model(project_name=project_name, model_name=model_name)
-    model_schema = model.schema.json()
+    try:
+        model = get_model(project_name=project_name, model_name=model_name)
+        model_schema = model.schema.json()
+    except Exception as e:
+        return "Error in obtaining model schema"
     return model_schema
 
 
@@ -108,8 +120,11 @@ def get_model_spec(project_name: str, model_name: str):
         project_name: Name of the project
         model_name: Name of the model
     """
-    model = get_model(project_name=project_name, model_name=model_name)
-    model_spec = model.spec.json()
+    try:
+        model = get_model(project_name=project_name, model_name=model_name)
+        model_spec = model.spec.json()
+    except Exception as e:
+        return "Error in obtaining model spec"
     return model_spec
 
 
@@ -122,16 +137,19 @@ def list_alertrules_for_model(project_name: str, model_name: str):
         project_name: Name of the project
         model_name: Name of the model
     """
-    model = get_model(project_name, model_name)
-    alert_rules = fdl.AlertRule.list(model_id=model.id)
-    rules = []
-    for rule in alert_rules:
-        print(rule)
-        rule = vars(rule)
-        del rule[MODEL_ID]
-        del rule[PROJECT_ID]
-        del rule[_RESP]
-        rules.append(rule)
+    try:
+        model = get_model(project_name, model_name)
+        alert_rules = fdl.AlertRule.list(model_id=model.id)
+        rules = []
+        for rule in alert_rules:
+            print(rule)
+            rule = vars(rule)
+            del rule[MODEL_ID]
+            del rule[PROJECT_ID]
+            del rule[_RESP]
+            rules.append(rule)
+    except Exception as e:
+        return "Error in obtaining alert rules"
     return rules
 
 
@@ -147,29 +165,28 @@ def list_triggered_alerts_for_rule(
         alert_rule_id: ID of the alert rule
         days: Number of days to look back (default 1)
     """
-    model = get_model(project_name, model_name)
-    print("################")
-    print(f"Model: {model.name}")
-    print("################")
+    try:
+        model = get_model(project_name, model_name)
 
-    # Get alerts triggered in the last X days
-    alert_records = fdl.AlertRecord.list(
-        alert_rule_id=alert_rule_id,
-        start_time=datetime.now() - timedelta(days=days),
-        end_time=datetime.now(),
-    )
+        # Get alerts triggered in the last X days
+        alert_records = fdl.AlertRecord.list(
+            alert_rule_id=alert_rule_id,
+            start_time=datetime.now() - timedelta(days=days),
+            end_time=datetime.now(),
+        )
 
-    records = []
-    for record in alert_records:
-        record = vars(record)
-        # Remove internal fields
-        del record[MODEL_ID]
-        del record[PROJECT_ID]
-        del record[ID]
-        del record[_RESP]
-        records.append(record)
-
-    return records
+        records = []
+        for record in alert_records:
+            record = vars(record)
+            # Remove internal fields
+            del record[MODEL_ID]
+            del record[PROJECT_ID]
+            del record[ID]
+            del record[_RESP]
+            records.append(record)
+        return records
+    except Exception as e:
+        return "Error in obtaining triggered alerts"
 
 
 @server.tool()
@@ -177,24 +194,27 @@ def list_all_model_custom_metrics(project_name: str, model_name: str):
     """List all custom metrics for a given model
     Custom metrics are metrics that are not part of the model's schema, but are calculated by the model.
     """
-    model = get_model(project_name, model_name)
-    model_id = str(model.id)
-    url = constants.CUSTOM_METRICS_URL.format(model_id=model_id)
-    response = requests.get(url, headers=constants.GET_HEADER)
-    custom_metrics = []
-    resp_json = response.json()
-    items = resp_json[constants.DATA][constants.ITEMS]
-    for item in items:
-        name = item[constants.NAME]
-        description = item[constants.DESCRIPTION]
-        definition = item[constants.DEFINITION]
-        metric_id = item[constants.ID]
-        custom_metrics.append(
-            {
-                constants.ID: metric_id,
-                constants.NAME: name,
-                constants.DESCRIPTION: description,
-                constants.DEFINITION: definition,
-            }
-        )
-    return custom_metrics
+    try:
+        model = get_model(project_name, model_name)
+        model_id = str(model.id)
+        url = constants.CUSTOM_METRICS_URL.format(model_id=model_id)
+        response = requests.get(url, headers=constants.GET_HEADER)
+        custom_metrics = []
+        resp_json = response.json()
+        items = resp_json[constants.DATA][constants.ITEMS]
+        for item in items:
+            name = item[constants.NAME]
+            description = item[constants.DESCRIPTION]
+            definition = item[constants.DEFINITION]
+            metric_id = item[constants.ID]
+            custom_metrics.append(
+                {
+                    constants.ID: metric_id,
+                    constants.NAME: name,
+                    constants.DESCRIPTION: description,
+                    constants.DEFINITION: definition,
+                }
+            )
+        return custom_metrics
+    except Exception as e:
+        return "Error in obtaining custom metrics"
