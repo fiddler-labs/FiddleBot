@@ -97,7 +97,9 @@ except Exception as e:
 auth_status = st.session_state.get(constants.ST_AUTH_STATUS)
 if auth_status:
     with st.sidebar:
-        st.write("FiddleBot is a chatbot that can help you with your questions.")
+        st.write(
+            "FiddleBot is a chatbot that can help you with questions about projects and models, only on the Preprod environment."
+        )
         st.write("FiddleBot has access the following capabilities via tools:")
         st.markdown(
             """
