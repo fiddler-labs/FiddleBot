@@ -45,7 +45,8 @@ Return all the results completely. Do not truncate anything.
 """
 
 
-FDL_PNS_MULTI_STEP_PROMPT = """You will be given a task to solve. Generate a list of tool calls to solve this task using the set of tools available. 
+FDL_PNS_MULTI_STEP_PROMPT = """You will be given a task to solve. Generate a list of tool calls to solve this task using the set of tools available.
+Use as few tools as possible to solve the task.
 Think through this step by step before giving your final output.
 Output only the plan, which should just be a list of steps and nothing more.
 Task to complete: {task}
