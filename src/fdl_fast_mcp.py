@@ -80,7 +80,7 @@ def list_all_projects() -> list[str]:
 @server.tool()
 def list_all_models_in_all_projects_in_organisation() -> list[str]:
     """
-    List the names of all model names across all projects in the organisation.
+    Tool to list all model names across all projects in the organisation.
     """
     print("Listing all models")
     try:
