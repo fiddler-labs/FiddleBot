@@ -78,6 +78,22 @@ def list_all_projects() -> list[str]:
 
 
 @server.tool()
+def list_all_models() -> list[str]:
+    """
+    List the names of all models in the organisation
+    """
+    print("Listing all models")
+    try:
+        model_names = []
+        project_names = list_all_projects()
+        for project_name in project_names:
+            model_names.extend(list_models_in_project(project_name))
+        return model_names
+    except Exception as e:
+        return "Error in obtaining models"
+
+
+@server.tool()
 def list_models_in_project(project_name: str) -> list[str]:
     """
     List out all model names associated with a project
