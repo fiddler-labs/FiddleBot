@@ -67,7 +67,7 @@ else:
     conversation_history = st.session_state[constants.ST_CONVERSATION_HISTORY]
 
 
-st.title(constants.ST_TITLE)
+# st.title(constants.ST_TITLE)
 
 config = {
     constants.ST_CREDENTIALS: {
@@ -96,6 +96,8 @@ except Exception as e:
 
 auth_status = st.session_state.get(constants.ST_AUTH_STATUS)
 if auth_status:
+    st.header(constants.ST_TITLE)
+    st.caption(constants.ST_FDL_ENV_MESSAGE)
     with st.sidebar:
         st.write(
             "FiddleBot is a chatbot that can help you with questions about projects and models, only on the Preprod environment."

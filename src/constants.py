@@ -107,3 +107,5 @@ ST_CONVERSATION_HISTORY = "conversation_history"
 
 MCP_SERVER_NAME = "fdl-server"
 ST_SESSION_ID = "_session_id"
+
+ST_FDL_ENV_MESSAGE = "FiddleBot Observability Environment : preprod.cloud.fiddler.ai"
