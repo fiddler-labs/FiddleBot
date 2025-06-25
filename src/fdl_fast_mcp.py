@@ -94,6 +94,14 @@ def list_all_models() -> list[str]:
 
 
 @server.tool()
+def count_items(item_list: list) -> int:
+    """Count the number of items in a list"""
+    if not isinstance(item_list, list):
+        return "Error: item_list is not a list"
+    return len(item_list)
+
+
+@server.tool()
 def list_models_in_project(project_name: str) -> list[str]:
     """
     List out all model names associated with a project
