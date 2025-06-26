@@ -68,9 +68,10 @@ def _list_all_projects() -> list[str]:
     List the names of all projects in the organisation
     """
     print("Listing all projects")
-    project_names = []
     try:
-        for project in fdl.Project.list():
+        project_names = []
+        projects = list(fdl.Project.list())
+        for project in projects:
             project_names.append(str(project.name))
         return project_names
     except Exception as e:
