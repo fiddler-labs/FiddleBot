@@ -1,6 +1,7 @@
 import os
 import asyncio
 import requests
+import traceback
 import fiddler as fdl
 
 from typing import Any
@@ -62,8 +63,7 @@ def get_model(project_name: str, model_name: str):
     return model
 
 
-@server.tool()
-def list_all_projects() -> list[str]:
+def _list_all_projects() -> list[str]:
     """
     List the names of all projects in the organisation
     """
@@ -72,9 +72,17 @@ def list_all_projects() -> list[str]:
     try:
         for project in fdl.Project.list():
             project_names.append(str(project.name))
+        return project_names
     except Exception as e:
         return "Error in obtaining projects"
-    return project_names
+
+
+@server.tool()
+def list_all_projects() -> list[str]:
+    """
+    List the names of all projects in the organisation
+    """
+    return _list_all_projects()
 
 
 @server.tool()
@@ -82,14 +90,23 @@ def list_all_models_in_all_projects_in_organisation() -> list[str]:
     """
     Tool to list all model names across all projects in the organisation.
     """
-    print("Listing all models")
     try:
+        print("Listing all projects")
         model_names = []
-        project_names = list_all_projects()
+        project_names = _list_all_projects()
+        if not isinstance(project_names, list):
+            return "Error in obtaining projects"
+        print(f"Found {len(project_names)} projects")
         for project_name in project_names:
-            model_names.extend(list_models_in_project(project_name))
+            print(f"Listing models in project: {project_name}")
+            model_list = _list_models_in_project(project_name)
+            if isinstance(model_list, list):
+                model_names.extend(model_list)
+            else:
+                continue
         return model_names
     except Exception as e:
+        print(f"Error in obtaining models: {traceback.format_exc()}")
         return "Error in obtaining models"
 
 
@@ -101,8 +118,8 @@ def count_items(item_list: list) -> int:
     return len(item_list)
 
 
-@server.tool()
-def list_models_in_project(project_name: str) -> list[str]:
+# @server.tool()
+def _list_models_in_project(project_name: str) -> list[str]:
     """
     List out all model names associated with a project
 
@@ -117,6 +134,14 @@ def list_models_in_project(project_name: str) -> list[str]:
     except Exception as e:
         return "Error in obtaining models"
     return model_names
+
+
+@server.tool()
+def list_models_in_project(project_name: str) -> list[str]:
+    """
+    List out all model names associated with a project
+    """
+    return _list_models_in_project(project_name)
 
 
 @server.tool()

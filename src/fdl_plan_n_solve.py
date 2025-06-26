@@ -24,7 +24,7 @@ load_dotenv()
 
 SERVER_PATH = "server_path"
 MODEL_4o_MINI = "gpt-4o-mini"
-MODEL_41_MINI = "gpt-4.1-mini"
+MODEL_41_MINI = "gpt-4.1"
 MESSAGE = "message"
 FUNC_CALL = "function_call"
 
