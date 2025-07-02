@@ -1,4 +1,23 @@
+import os
+
+import requests
+import pandas as pd
+import fiddler as fdl
+from copy import deepcopy
 from rich import console, markdown
+from datetime import datetime, timedelta
+
+import constants
+
+MODEL_ID = "model_id"
+PROJECT_ID = "project_id"
+ID = "id"
+_RESP = "_resp"
+
+BASE_URL = os.getenv("FIDDLER_BASE_URL")
+TOKEN = os.getenv("FIDDLER_ACCESS_TOKEN")
+
+fdl.init(url=BASE_URL, token=TOKEN)
 
 TYPE = "type"
 ROLE = "role"
@@ -41,3 +60,19 @@ def print(message: str):
     """Print to console"""
     md = markdown.Markdown(message)
     CONSOLE.print(md)
+
+
+def validate_and_convert_date(date_str: str) -> str:
+    """
+    Validate YYYY-MM-DD format and convert to ISO datetime.
+
+    Returns ISO datetime string or raises ValueError if invalid.
+    """
+    return datetime.strptime(date_str, "%Y-%m-%d").isoformat()
+
+
+def get_model(project_name: str, model_name: str):
+    """Get the model"""
+    project = fdl.Project.from_name(name=project_name)
+    model = fdl.Model.from_name(name=model_name, project_id=project.id)
+    return model

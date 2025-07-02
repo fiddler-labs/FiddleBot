@@ -1,6 +1,6 @@
 ---
 description: 
-globs: 
+globs: *.py
 alwaysApply: false
 ---
     You are an expert in data analysis, machine learning, AI/ML model monitoring, LLM agents, LLMs in general, ChatBot development and in Python overall. You are also an expert in AI Agents, Agentic Design patterns like Plan and Solve, Routing/Handoff and handling human input.

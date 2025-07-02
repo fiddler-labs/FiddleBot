@@ -1,0 +1,601 @@
+{
+  "data": {
+    "model": {
+      "id": "431b97c7-1800-4448-b777-b3c7ba56c4a9",
+      "name": "bank_churn_simple_monitoring",
+      "version": "v1"
+    },
+    "project": {
+      "id": "0dde103e-bee5-4cbf-b28f-954b99cb6f32",
+      "name": "py_test"
+    },
+    "organization": {
+      "id": "febfb97f-6e51-4a43-a66c-86bab1c0c6fb",
+      "name": "preprod"
+    },
+    "metric_types": [
+      {
+        "key": "drift",
+        "name": "Data Drift"
+      },
+      {
+        "key": "data_integrity",
+        "name": "Data Integrity"
+      },
+      {
+        "key": "performance",
+        "name": "Performance"
+      },
+      {
+        "key": "service_metrics",
+        "name": "Traffic"
+      },
+      {
+        "key": "statistic",
+        "name": "Statistic"
+      },
+      {
+        "key": "custom",
+        "name": "Custom Metric"
+      }
+    ],
+    "metrics": [
+      {
+        "id": "any_violation_percentage",
+        "name": "% Any Violation",
+        "type": "data_integrity",
+        "columns": [
+          "__ANY__",
+          "customer_id",
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": true,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "null_violation_percentage",
+        "name": "% Missing Value Violation",
+        "type": "data_integrity",
+        "columns": [
+          "__ANY__",
+          "customer_id",
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": true,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "range_violation_percentage",
+        "name": "% Range Violation",
+        "type": "data_integrity",
+        "columns": [
+          "__ANY__",
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": true,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "type_violation_percentage",
+        "name": "% Type Violation",
+        "type": "data_integrity",
+        "columns": [
+          "__ANY__",
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": true,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "auc",
+        "name": "AUC",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "auroc",
+        "name": "AUROC",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "accuracy",
+        "name": "Accuracy",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "any_violation_count",
+        "name": "Any Violation",
+        "type": "data_integrity",
+        "columns": [
+          "__ANY__",
+          "customer_id",
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "average",
+        "name": "Average",
+        "type": "statistic",
+        "columns": [
+          "creditscore",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "calibrated_threshold",
+        "name": "Calibrated Threshold",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "expected_calibration_error",
+        "name": "Expected Calibration Error",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "f1_score",
+        "name": "F1",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": true,
+        "requires_top_k": false
+      },
+      {
+        "id": "fpr",
+        "name": "False Positive Rate",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": true,
+        "requires_top_k": false
+      },
+      {
+        "id": "frequency",
+        "name": "Frequency",
+        "type": "statistic",
+        "columns": [
+          "geography",
+          "gender",
+          "churn"
+        ],
+        "requires_baseline": false,
+        "requires_categories": true,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "geometric_mean",
+        "name": "Geometric Mean",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": true,
+        "requires_top_k": false
+      },
+      {
+        "id": "jsd",
+        "name": "Jensen-Shannon Distance",
+        "type": "drift",
+        "columns": [
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": true,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "log_loss",
+        "name": "Log Loss",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "null_violation_count",
+        "name": "Missing Value Violation",
+        "type": "data_integrity",
+        "columns": [
+          "__ANY__",
+          "customer_id",
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "psi",
+        "name": "Population Stability Index",
+        "type": "drift",
+        "columns": [
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": true,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "precision",
+        "name": "Precision",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": true,
+        "requires_top_k": false
+      },
+      {
+        "id": "range_violation_count",
+        "name": "Range Violation",
+        "type": "data_integrity",
+        "columns": [
+          "__ANY__",
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "recall",
+        "name": "Recall / TPR",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": true,
+        "requires_top_k": false
+      },
+      {
+        "id": "sum",
+        "name": "Sum",
+        "type": "statistic",
+        "columns": [
+          "creditscore",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "data_count",
+        "name": "Total Count",
+        "type": "performance",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "traffic",
+        "name": "Traffic",
+        "type": "service_metrics",
+        "columns": [],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      },
+      {
+        "id": "type_violation_count",
+        "name": "Type Violation",
+        "type": "data_integrity",
+        "columns": [
+          "__ANY__",
+          "creditscore",
+          "geography",
+          "gender",
+          "age",
+          "tenure",
+          "balance",
+          "numofproducts",
+          "hascrcard",
+          "isactivemember",
+          "estimatedsalary",
+          "predicted_churn",
+          "churn",
+          "timestamp"
+        ],
+        "requires_baseline": false,
+        "requires_categories": false,
+        "is_percentage_comparison": false,
+        "requires_threshold": false,
+        "requires_top_k": false
+      }
+    ],
+    "columns": [
+      {
+        "id": "__ANY__",
+        "name": "All columns"
+      },
+      {
+        "id": "creditscore",
+        "name": "creditscore",
+        "group": "Inputs",
+        "data_type": "int"
+      },
+      {
+        "id": "geography",
+        "name": "geography",
+        "group": "Inputs",
+        "data_type": "category"
+      },
+      {
+        "id": "gender",
+        "name": "gender",
+        "group": "Inputs",
+        "data_type": "category"
+      },
+      {
+        "id": "age",
+        "name": "age",
+        "group": "Inputs",
+        "data_type": "int"
+      },
+      {
+        "id": "tenure",
+        "name": "tenure",
+        "group": "Inputs",
+        "data_type": "int"
+      },
+      {
+        "id": "balance",
+        "name": "balance",
+        "group": "Inputs",
+        "data_type": "float"
+      },
+      {
+        "id": "numofproducts",
+        "name": "numofproducts",
+        "group": "Inputs",
+        "data_type": "int"
+      },
+      {
+        "id": "hascrcard",
+        "name": "hascrcard",
+        "group": "Inputs",
+        "data_type": "int"
+      },
+      {
+        "id": "isactivemember",
+        "name": "isactivemember",
+        "group": "Inputs",
+        "data_type": "int"
+      },
+      {
+        "id": "estimatedsalary",
+        "name": "estimatedsalary",
+        "group": "Inputs",
+        "data_type": "float"
+      },
+      {
+        "id": "predicted_churn",
+        "name": "predicted_churn",
+        "group": "Outputs",
+        "data_type": "float"
+      },
+      {
+        "id": "churn",
+        "name": "churn",
+        "group": "Targets",
+        "data_type": "category"
+      },
+      {
+        "id": "customer_id",
+        "name": "customer_id",
+        "group": "Metadata",
+        "data_type": "str"
+      },
+      {
+        "id": "timestamp",
+        "name": "timestamp",
+        "group": "Metadata",
+        "data_type": "int"
+      }
+    ]
+  },
+  "api_version": "3.0",
+  "kind": "NORMAL"
+}

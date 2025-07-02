@@ -9,6 +9,7 @@ import streamlit as st
 from uuid import uuid4
 from rich import print
 from dotenv import load_dotenv
+from pydantic import BaseModel
 
 # from openai import AsyncOpenAI
 from langfuse.openai import openai, AsyncOpenAI
@@ -28,6 +29,7 @@ import utils
 import constants
 
 import fdl_tracer
+import fdl_queries
 import fdl_plan_n_solve
 
 load_dotenv()
@@ -75,6 +77,10 @@ You will only respond to questions that are related to Fiddler. Ask the user to 
 
 TOOL_CALL_RESULT_TEMPLATE = (
     """The result of calling the tool {name} with arguments {args} is {result}"""
+)
+
+HAS_PERFORMANCE_QUERY_PROMPT = (
+    "Does the user want to query performance metrics for a given model?"
 )
 
 # resource = Resource.create(attributes={SERVICE_NAME: constants.SERVICE_NAME})
@@ -151,6 +157,38 @@ class AsyncChatBot:
             utils.print(GOODBYE_MESSAGE)
             sys.exit(0)
 
+    # async def has_performance_query(self, conversation_history: list) -> bool:
+    #     """Check if the conversation history contains a performance query"""
+
+    #     # user_message = conversation_history[-1]
+    #     # modified_conversation_history = conversation_history[:-1]
+    #     user_query = utils.create_message(USER_ROLE, HAS_PERFORMANCE_QUERY_PROMPT)
+    #     modified_conversation_history = conversation_history + [user_query]
+
+    #     class HasPerformanceQuery(BaseModel):
+    #         reasoning: str
+    #         has_performance_query: bool
+
+    #     result = await self.client.responses.parse(
+    #         model=self.model_name,
+    #         input=modified_conversation_history,
+    #         max_output_tokens=MAX_TOKENS,
+    #         text_format=HasPerformanceQuery,
+    #     )
+
+    #     return result.output_parsed.has_performance_query
+
+    # async def extract_project_and_model_name(
+    #     self, conversation_history: list
+    # ) -> tuple[str, str]:
+    #     """Extract the project and model name from the conversation history"""
+    #     user_query = utils.create_message(
+    #         USER_ROLE, EXTRACT_PROJECT_AND_MODEL_NAME_PROMPT
+    #     )
+    #     modified_conversation_history = conversation_history + [user_query]
+
+    #     return result.output_parsed.project_name, result.output_parsed.model_name
+
     async def get_llm_response(self, conversation_history: list) -> str:
         """Get response from OpenAI's GPT model asynchronously."""
         # Add user message to conversation history
@@ -158,6 +196,20 @@ class AsyncChatBot:
         # self.conversation_history.append(user_message)
 
         # Get response from OpenAI asynchronously
+
+        # if await self.has_performance_query(conversation_history):
+        #     project_name, model_name = await self.extract_project_and_model_name(
+        #         conversation_history
+        #     )
+        #     if project_name is None or model_name is None:
+        #         # ask_user_for project and model name
+        #         pass
+        #     end_date = await self.extract_end_date(conversation_history)
+        #     start_date = await self.extract_start_date(conversation_history)
+        #     performance_df = fdl_queries.get_performance_metrics(
+        #         project_name, model_name, start_date, end_date
+        #     )
+
         with self.tracer.start_as_current_span(constants.LLM_RESPONSE) as llm_response:
             response = await self.client.chat.completions.create(
                 model=self.model_name,
@@ -270,6 +322,20 @@ class AsyncChatBot:
 
                 conversation_history = await self.get_llm_response(conversation_history)
                 ai_response = conversation_history[-1][constants.CONTENT]
+
+                # if await self.has_performance_query(conversation_history):
+                #     project_name, model_name = (
+                #         await self.extract_project_and_model_name(conversation_history)
+                #     )
+                #     if project_name is None or model_name is None:
+                #         # ask_user_for project and model name
+                #         pass
+                #     end_date = await self.extract_end_date(conversation_history)
+                #     start_date = await self.extract_start_date(conversation_history)
+                #     performance_df = fdl_queries.get_performance_metrics(
+                #         project_name, model_name, start_date, end_date
+                #     )
+
                 utils.print(f"{AI_RESPONSE_PROMPT}{ai_response}")
 
 

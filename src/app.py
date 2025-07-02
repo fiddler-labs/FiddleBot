@@ -9,10 +9,19 @@ import streamlit_authenticator as stauth
 import utils
 import fdl_chat
 import constants
+import fdl_queries
+
+PROJECT_MODEL_NAME_ERROR_MESSAGE = "The project name and model name are required to query performance metrics. Please provide them."
+START_END_DATE_ERROR_MESSAGE = "The start and end dates are required to query performance metrics. Please provide them."
+PERFORMANCE_QUERY_ERROR_MESSAGE = (
+    "Error in querying performance metrics. Please try again."
+)
+PERFORMANCE_QUERY_SUCCESS_MESSAGE = "Performance metrics for the model have been queried successfully. The graphs is displayed above."
 
 st.set_page_config(page_title=constants.ST_TITLE, page_icon=constants.ST_FAVICON_PATH)
 
 tasks = {}
+fdl_queries = fdl_queries.FdlQueries()
 
 try:
     loop = asyncio.get_event_loop().set_debug(True)
@@ -65,6 +74,41 @@ if constants.ST_CONVERSATION_HISTORY not in st.session_state:
     st.session_state[constants.ST_CONVERSATION_HISTORY] = conversation_history
 else:
     conversation_history = st.session_state[constants.ST_CONVERSATION_HISTORY]
+
+
+def handle_performance_query():
+    """Handle the performance query"""
+    utils.print("Handling performance query")
+
+    ## conversatoin_history is from the global variable
+    if fdl_queries.has_performance_query(conversation_history):
+        utils.print("Has performance query")
+        project_name, model_name = fdl_queries.extract_project_and_model_name(
+            conversation_history
+        )
+        if project_name == "" or model_name == "":
+            utils.print("Project name or model name is None")
+            return PROJECT_MODEL_NAME_ERROR_MESSAGE
+
+        start_date, end_date = fdl_queries.extract_start_end_date(conversation_history)
+        if start_date is None or end_date is None:
+            utils.print("Start date or end date is None")
+            return START_END_DATE_ERROR_MESSAGE
+
+        performance_df = fdl_queries.get_performance_metrics(
+            project_name, model_name, start_date, end_date
+        )
+        if performance_df is None:
+            utils.print("Performance df is None")
+            return PERFORMANCE_QUERY_ERROR_MESSAGE
+        else:
+            for metric_name, metric_df in performance_df.items():
+                st.markdown(f"## {metric_name}")
+                st.line_chart(metric_df, x=constants.DATE, y=constants.VALUE)
+
+            return PERFORMANCE_QUERY_SUCCESS_MESSAGE
+    else:
+        return False
 
 
 # st.title(constants.ST_TITLE)
@@ -150,20 +194,72 @@ if auth_status:
 
         with st.spinner("Thinking..."):
             task_key = f"task-{gen_key(prompt)}"
-            schedule_task(task_key, fdl_chatbot.get_llm_response(conversation_history))
-            process_tasks()
+            # if fdl_queries.has_performance_query(conversation_history):
+            #     project_name, model_name = fdl_queries.extract_project_and_model_name(
+            #         conversation_history
+            #     )
+            #     if project_name is None or model_name is None:
+            #         # ask_user_for project and model name
+            #         response = "The project name and model name are required to query performance metrics. Please provide them."
+            #         ai_message = utils.create_message(
+            #             constants.ASSISTANT_ROLE, response
+            #         )
+            #         conversation_history.append(ai_message)
 
-        if task_key in tasks:
-            task = tasks[task_key]
+            #     start_date, end_date = fdl_queries.extract_start_end_date(
+            #         conversation_history
+            #     )
+            #     if start_date is None or end_date is None:
+            #         response = "The start and end dates are required to query performance metrics. Please provide them."
+            #         ai_message = utils.create_message(
+            #             constants.ASSISTANT_ROLE, response
+            #         )
+            #         conversation_history.append(ai_message)
 
-            if task.done():
-                ## Path is relative to the directory from where the app is run
-                conversation_history = task.result()
-                response = conversation_history[-1][constants.CONTENT]
-                with st.chat_message(
-                    constants.ST_FDL_ROLE, avatar=constants.ST_ICON_PATH
-                ):
-                    st.markdown(response)
+            #     performance_df = fdl_queries.get_performance_metrics(
+            #         project_name, model_name, start_date, end_date
+            #     )
+            #     if performance_df is None:
+            #         response = (
+            #             "Error in querying performance metrics. Please try again."
+            #         )
+            #         ai_message = utils.create_message(
+            #             constants.ASSISTANT_ROLE, response
+            #         )
+            #         conversation_history.append(ai_message)
+            #     else:
+            #         for metric_name, metric_df in performance_df.items():
+            #             st.markdown(f"## {metric_name}")
+            #             st.line_chart(metric_df)
+
+            #         response = "Performance metrics for the model have been queried successfully. The graphs is displayed above."
+            #         ai_message = utils.create_message(
+            #             constants.ASSISTANT_ROLE, response
+            #         )
+            #         conversation_history.append(ai_message)
+
+            performance_query_response = handle_performance_query()
+            if isinstance(performance_query_response, str):
+                response = performance_query_response
+                ai_message = utils.create_message(constants.ASSISTANT_ROLE, response)
+                conversation_history.append(ai_message)
+            else:
+                schedule_task(
+                    task_key, fdl_chatbot.get_llm_response(conversation_history)
+                )
+                process_tasks()
+
+                if task_key in tasks:
+                    task = tasks[task_key]
+
+                    if task.done():
+                        ## Path is relative to the directory from where the app is run
+                        conversation_history = task.result()
+                        response = conversation_history[-1][constants.CONTENT]
+                        with st.chat_message(
+                            constants.ST_FDL_ROLE, avatar=constants.ST_ICON_PATH
+                        ):
+                            st.markdown(response)
 
         ## Store response in session state
         fdl_message = {
