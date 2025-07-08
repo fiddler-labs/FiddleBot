@@ -303,7 +303,6 @@ class FiddlerExecClient:
                         tool_result = await self.mcp_client.call_tool(
                             tool_name, tool_args
                         )
-                    breakpoint()
                     # tool_call_span.set_attribute(
                     # constants.TOOL_CALL_ID, tool_call.call_id
                     # )
