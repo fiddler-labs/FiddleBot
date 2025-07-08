@@ -14,6 +14,7 @@ from langfuse.openai import OpenAI, AsyncOpenAI
 
 import utils
 import constants
+import fdl_tracer
 
 MODEL_ID = "model_id"
 PROJECT_ID = "project_id"
@@ -105,7 +106,6 @@ def parse_performance_response(resp_json: dict):
         constants.DATE: [],
         constants.VALUE: [],
     }
-    breakpoint()
     for query_key, result in resp_json[constants.DATA][constants.RESULTS].items():
         metric = result[constants.METRIC]
         values = result[constants.DATA]
@@ -169,6 +169,12 @@ class FdlQueries:
 
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+        self.fdl_tracer = fdl_tracer.FdlTracer.get_instance(
+            tracer_name=constants.SERVICE_NAME,
+            otel_export=os.getenv(constants.OTEL_EXP),
+        )
+        self.tracer = self.fdl_tracer.get_tracer()
+
     def has_performance_query(self, conversation_history: list) -> bool:
         """Check if the conversation history contains a performance query"""
         user_message = conversation_history[-1][constants.CONTENT]
@@ -178,14 +184,29 @@ class FdlQueries:
         )
         modified_conversation_history = conversation_history[:-1] + [user_query]
 
-        response = self.client.responses.parse(
+        response = self.client.chat.completions.parse(
             model=self.MODEL_NAME,
-            input=modified_conversation_history,
-            max_output_tokens=constants.MAX_TOKENS,
-            text_format=HasPerformanceQuery,
+            messages=modified_conversation_history,
+            max_tokens=constants.MAX_TOKENS,
+            response_format=HasPerformanceQuery,
         )
 
-        return response.output_parsed.has_performance_query
+        with self.tracer.start_as_current_span(
+            constants.HAS_PERFORMANCE_SPAN
+        ) as has_performance_span:
+            has_performance_span.set_attribute(
+                constants.AGENT_NAME, constants.QUERY_AGENT
+            )
+            has_performance_span.set_attribute(
+                constants.SPAN_TYPE, constants.SPAN_TYPE_LLM
+            )
+            has_performance_span.set_attribute(constants.ATTR_USER_PROMPT, user_message)
+            has_performance_span.set_attribute(
+                constants.ATTR_OUTPUT,
+                response.choices[0].message.parsed.has_performance_query,
+            )
+
+        return response.choices[0].message.parsed.has_performance_query
 
     def extract_project_and_model_name(
         self, conversation_history: list
@@ -198,14 +219,27 @@ class FdlQueries:
             EXTRACT_PROJECT_AND_MODEL_NAME_PROMPT.format(message=user_message),
         )
         modified_conversation_history = conversation_history[:-1] + [user_query]
-        response = self.client.responses.parse(
+        response = self.client.chat.completions.parse(
             model=self.MODEL_NAME,
-            input=modified_conversation_history,
-            max_output_tokens=constants.MAX_TOKENS,
-            text_format=ProjectModel,
+            messages=modified_conversation_history,
+            max_tokens=constants.MAX_TOKENS,
+            response_format=ProjectModel,
         )
+        with self.tracer.start_as_current_span(
+            constants.MODEL_PROJ_SPAN
+        ) as model_proj_span:
+            model_proj_span.set_attribute(constants.AGENT_NAME, constants.QUERY_AGENT)
+            model_proj_span.set_attribute(constants.SPAN_TYPE, constants.SPAN_TYPE_LLM)
+            model_proj_span.set_attribute(constants.ATTR_USER_PROMPT, user_message)
+            simplified_output = f"Project: {response.choices[0].message.parsed.project_name}, Model: {response.choices[0].message.parsed.model_name}"
+            model_proj_span.set_attribute(constants.ATTR_OUTPUT, simplified_output)
 
-        return response.output_parsed.project_name, response.output_parsed.model_name
+        # with self.tracer.start_as_current_span(constants.QUERY_AGENT) as query_agent:
+
+        return (
+            response.choices[0].message.parsed.project_name,
+            response.choices[0].message.parsed.model_name,
+        )
 
     def extract_start_end_date(self, conversation_history: list) -> tuple[str, str]:
         """Extract the start and end dates from the conversation history"""
@@ -216,15 +250,27 @@ class FdlQueries:
             EXTRACT_START_END_DATE_PROMPT.format(message=user_message),
         )
         modified_conversation_history = conversation_history[:-1] + [user_query]
-        response = self.client.responses.parse(
+        response = self.client.chat.completions.parse(
             model=self.MODEL_NAME,
-            input=modified_conversation_history,
-            max_output_tokens=constants.MAX_TOKENS,
-            text_format=QueryDates,
+            messages=modified_conversation_history,
+            max_tokens=constants.MAX_TOKENS,
+            response_format=QueryDates,
         )
+        with self.tracer.start_as_current_span(
+            constants.START_END_DATE_SPAN
+        ) as start_end_date_span:
+            start_end_date_span.set_attribute(
+                constants.AGENT_NAME, constants.QUERY_AGENT
+            )
+            start_end_date_span.set_attribute(
+                constants.SPAN_TYPE, constants.SPAN_TYPE_LLM
+            )
+            start_end_date_span.set_attribute(constants.ATTR_USER_PROMPT, user_message)
+            simplified_output = f"Start Date: {response.choices[0].message.parsed.start_date}, End Date: {response.choices[0].message.parsed.end_date}"
+            start_end_date_span.set_attribute(constants.ATTR_OUTPUT, simplified_output)
 
-        start_date = response.output_parsed.start_date
-        end_date = response.output_parsed.end_date
+        start_date = response.choices[0].message.parsed.start_date
+        end_date = response.choices[0].message.parsed.end_date
 
         if start_date == "" or end_date == "":
             return None, None

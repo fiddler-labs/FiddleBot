@@ -150,7 +150,9 @@ class AsyncChatBot:
         try:
             user_input = input(USER_INPUT_PROMPT).strip()
             with self.tracer.start_as_current_span(constants.USER_INPUT) as input_span:
-                input_span.set_attribute(constants.USER_INPUT, user_input)
+                input_span.set_attribute(constants.AGENT_NAME, constants.CONV_AGENT)
+                input_span.set_attribute(constants.SPAN_TYPE, constants.SPAN_TYPE_LLM)
+                input_span.set_attribute(constants.ATTR_USER_PROMPT, user_input)
 
             return user_input
         except KeyboardInterrupt:
@@ -217,16 +219,16 @@ class AsyncChatBot:
                 max_tokens=MAX_TOKENS,
                 tools=self.available_tools,
                 tool_choice="auto",
-                session_id=self.session_id,
+                # session_id=self.session_id,
             )
 
             tool_call_results = []
             tool_call_ids = []
 
             if response.choices[0].message.tool_calls is not None:
-                llm_response.set_attribute(
-                    constants.TOOL_CHOICE, str(response.choices[0].message)
-                )
+                # llm_response.set_attribute(
+                # constants.TOOL_CHOICE, str(response.choices[0].message)
+                # )
                 conversation_history.append(response.choices[0].message)
 
                 for tool_call in response.choices[0].message.tool_calls:
@@ -253,14 +255,18 @@ class AsyncChatBot:
                         tool_call_results.append(result)
                         tool_call_ids.append(tool_id)
 
-                        tool_call_span.set_attribute(constants.TOOL_CALL_ID, tool_id)
-                        tool_call_span.set_attribute(constants.TOOL_CALL_NAME, name)
+                        # tool_call_span.set_attribute(constants.TOOL, tool_id)
                         tool_call_span.set_attribute(
-                            constants.TOOL_CALL_ARGS, json.dumps(args)
+                            constants.AGENT_NAME, constants.CONV_AGENT
                         )
                         tool_call_span.set_attribute(
-                            constants.TOOL_CALL_RESULTS, result
+                            constants.SPAN_TYPE, constants.SPAN_TYPE_TOOL
                         )
+                        tool_call_span.set_attribute(constants.TOOL_ATTR_NAME, name)
+                        tool_call_span.set_attribute(
+                            constants.TOOL_ATTR_INPUT, json.dumps(args)
+                        )
+                        tool_call_span.set_attribute(constants.TOOL_ATTR_OUTPUT, result)
 
                 for tool_call_result, tool_call_id in zip(
                     tool_call_results, tool_call_ids
@@ -278,14 +284,21 @@ class AsyncChatBot:
                         model=self.model_name,
                         messages=conversation_history,
                         max_tokens=MAX_TOKENS,
-                        session_id=self.session_id,
                     )
                     ai_response = response.choices[0].message.content
-                    llm_tool_response.set_attribute(constants.AI_RESPONSE, ai_response)
+                    llm_tool_response.set_attribute(
+                        constants.AGENT_NAME, constants.CONV_AGENT
+                    )
+                    llm_tool_response.set_attribute(
+                        constants.SPAN_TYPE, constants.SPAN_TYPE_LLM
+                    )
+                    llm_tool_response.set_attribute(constants.ATTR_OUTPUT, ai_response)
             else:
                 # Extract and store the assistant's response
                 ai_response = response.choices[0].message.content
-                llm_response.set_attribute(constants.AI_RESPONSE, ai_response)
+                llm_response.set_attribute(constants.AGENT_NAME, constants.CONV_AGENT)
+                llm_response.set_attribute(constants.SPAN_TYPE, constants.SPAN_TYPE_LLM)
+                llm_response.set_attribute(constants.ATTR_OUTPUT, ai_response)
 
         assistant_message = utils.create_message(ASSISTANT_ROLE, ai_response)
         conversation_history.append(assistant_message)
@@ -307,7 +320,9 @@ class AsyncChatBot:
         conversation_history = [system_message]
 
         with self.tracer.start_as_current_span(constants.CHAT_LOOP) as chat_loop:
-            chat_loop.set_attribute(constants.SYSTEM_PROMPT, self.system_prompt)
+            chat_loop.set_attribute(constants.AGENT_NAME, constants.CONV_AGENT)
+            chat_loop.set_attribute(constants.SPAN_TYPE, constants.SPAN_TYPE_LLM)
+            chat_loop.set_attribute(constants.ATTR_SYSTEM_PROMPT, self.system_prompt)
             while True:
                 user_input = self.get_user_input()
 

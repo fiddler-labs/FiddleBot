@@ -235,7 +235,6 @@ class FiddlerExecClient:
             model=self.MODEL_NAME,
             input=messages,
             tools=self.available_tools,
-            session_id=self.session_id,
         )
         return response
 
@@ -252,9 +251,12 @@ class FiddlerExecClient:
             constants.PNS_GENERATE_PLAN
         ) as gen_plan_span:
             response = await self.get_llm_response(messages)
+            gen_plan_span.set_attribute(constants.AGENT_NAME, constants.PNS_AGENT)
+            gen_plan_span.set_attribute(constants.SPAN_TYPE, constants.SPAN_TYPE_LLM)
             gen_plan_span.set_attribute(
-                constants.PNS_GENERATE_PLAN_RESPONSE, response.output_text
+                constants.ATTR_USER_PROMPT, user_message[constants.CONTENT]
             )
+            gen_plan_span.set_attribute(constants.ATTR_OUTPUT, response.output_text)
 
         utils.print(f"Plan: {response.output_text}")
         steps_list = response.output_text.split("\n")
@@ -301,19 +303,29 @@ class FiddlerExecClient:
                         tool_result = await self.mcp_client.call_tool(
                             tool_name, tool_args
                         )
+                    breakpoint()
+                    # tool_call_span.set_attribute(
+                    # constants.TOOL_CALL_ID, tool_call.call_id
+                    # )
                     tool_call_span.set_attribute(
-                        constants.TOOL_CALL_ID, tool_call.call_id
+                        constants.AGENT_NAME, constants.PNS_AGENT
                     )
-                    tool_call_span.set_attribute(constants.TOOL_CALL_NAME, tool_name)
                     tool_call_span.set_attribute(
-                        constants.TOOL_CALL_ARGS, tool_call.arguments
+                        constants.SPAN_TYPE, constants.SPAN_TYPE_TOOL
                     )
-                    if len(tool_result) == 0:
+                    tool_call_span.set_attribute(constants.TOOL_ATTR_NAME, tool_name)
+                    tool_call_span.set_attribute(
+                        constants.TOOL_ATTR_INPUT, tool_call.arguments
+                    )
+                    if (
+                        len(tool_result.content) == 0
+                        or len(tool_result.content[0].text) == 0
+                    ):
                         tool_result_text = f"No Resuls from {tool_name}"
                     else:
-                        tool_result_text = tool_result[0].text
+                        tool_result_text = tool_result.content[0].text
                     tool_call_span.set_attribute(
-                        constants.TOOL_CALL_RESULTS, tool_result_text
+                        constants.TOOL_ATTR_OUTPUT, tool_result_text
                     )
 
                 ## Generate natural language response from tool result
@@ -327,7 +339,13 @@ class FiddlerExecClient:
                 ) as tool_llm_response_span:
                     response = await self.get_llm_response(messages)
                     tool_llm_response_span.set_attribute(
-                        constants.PNS_TOOL_LLM_RESPONSE, response.output_text
+                        constants.AGENT_NAME, constants.PNS_AGENT
+                    )
+                    tool_llm_response_span.set_attribute(
+                        constants.SPAN_TYPE, constants.SPAN_TYPE_LLM
+                    )
+                    tool_llm_response_span.set_attribute(
+                        constants.ATTR_OUTPUT, response.output_text
                     )
 
                 messages.append(
@@ -360,14 +378,22 @@ class FiddlerExecClient:
         ) as plan_n_solve_span:
             plan = await self.generate_plan(task)
             utils.print(f"Plan: {'\n'.join(plan)}")
-            plan_n_solve_span.set_attribute(constants.PLAN, "\n".join(plan))
+            plan_n_solve_span.set_attribute(constants.AGENT_NAME, constants.PNS_AGENT)
+            plan_n_solve_span.set_attribute(
+                constants.SPAN_TYPE, constants.SPAN_TYPE_CHAIN
+            )
+            plan_n_solve_span.set_attribute(constants.ATTR_USER_PROMPT, task)
+            plan_n_solve_span.set_attribute(constants.ATTR_OUTPUT, "\n".join(plan))
 
         ## Solve
         with self.tracer.start_as_current_span(
             constants.PNS_EXEC_PLAN, context=otel_context
         ) as exec_plan_span:
             result = await self.execute_plan(plan)
-            exec_plan_span.set_attribute(constants.PNS_RESULT, result)
+            exec_plan_span.set_attribute(constants.AGENT_NAME, constants.PNS_AGENT)
+            exec_plan_span.set_attribute(constants.SPAN_TYPE, constants.SPAN_TYPE_CHAIN)
+            exec_plan_span.set_attribute(constants.ATTR_USER_PROMPT, "\n".join(plan))
+            exec_plan_span.set_attribute(constants.ATTR_OUTPUT, result)
 
         self.session_id = None
         return result

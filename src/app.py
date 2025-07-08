@@ -9,6 +9,7 @@ import streamlit_authenticator as stauth
 import utils
 import fdl_chat
 import constants
+import fdl_tracer
 import fdl_queries
 
 PROJECT_MODEL_NAME_ERROR_MESSAGE = "The project name and model name are required to query performance metrics. Please provide them."
@@ -22,6 +23,8 @@ st.set_page_config(page_title=constants.ST_TITLE, page_icon=constants.ST_FAVICON
 
 tasks = {}
 fdl_queries = fdl_queries.FdlQueries()
+# fdl_tracer = fdl_tracer.get_instance(tracer_name=constants.SERVICE_NAME, otel_export=os.getenv(constants.OTEL_EXP))
+# tracer= fdl_tracer.get_tracer()
 
 try:
     loop = asyncio.get_event_loop().set_debug(True)
@@ -243,6 +246,10 @@ if auth_status:
                 response = performance_query_response
                 ai_message = utils.create_message(constants.ASSISTANT_ROLE, response)
                 conversation_history.append(ai_message)
+                with st.chat_message(
+                    constants.ST_FDL_ROLE, avatar=constants.ST_ICON_PATH
+                ):
+                    st.markdown(response)
             else:
                 schedule_task(
                     task_key, fdl_chatbot.get_llm_response(conversation_history)

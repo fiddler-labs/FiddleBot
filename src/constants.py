@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 BASE_URL = st.secrets["FIDDLER_BASE_URL"]
 # TOKEN = os.getenv("FIDDLER_ACCESS_TOKEN")
 TOKEN = st.secrets["FIDDLER_ACCESS_TOKEN"]
+APPLICATION_ID = st.secrets["FIDDLER_APPLICATION_ID"]
 
 CUSTOM_METRICS_URL = urllib.parse.urljoin(
     BASE_URL, "/v3/models/{model_id}/custom-metrics"
@@ -33,7 +34,8 @@ DEFINITION = "definition"
 
 # OpenTelemetry
 SERVICE_NAME = "fdl-chat"
-OTEL_ENDPOINT = "http://localhost:4318/v1/traces"
+# OTEL_ENDPOINT = "http://localhost:4318/v1/traces"
+OTEL_ENDPOINT = "https://preprod.cloud.fiddler.ai/v1/traces"
 
 ## OpenTelemetry Span Names
 CHAT_LOOP = "chat_loop"
@@ -211,3 +213,48 @@ REQUIRES_CATEGORIES = "requires_categories"
 DATE = "date"
 RESULTS = "results"
 VALUE = "value"
+
+
+## Open Telemetry Constants
+
+# LLM Attributes
+ATTR_SYSTEM_PROMPT = "gen_ai.llm.input.system"
+ATTR_USER_PROMPT = "gen_ai.llm.input.user"
+ATTR_OUTPUT = "gen_ai.llm.output"
+ATTR_CONTEXT = "gen_ai.llm.context"
+
+# Tool Attributes
+TOOL_ATTR_NAME = "gen_ai.tool.name"
+TOOL_ATTR_INPUT = "gen_ai.tool.input"
+TOOL_ATTR_OUTPUT = "gen_ai.tool.output"
+
+# Common Attributes
+SPAN_TYPE = "fiddler.span.type"
+AGENT_NAME = "gen_ai.agent.name"
+AGENT_ID = "gen_ai.agent.id"
+CONV_ID = "gen_ai.conversation.id"
+
+OTEL_HEADER = {
+    "authorization": f"Bearer {TOKEN}",
+    "fiddler-application-id": APPLICATION_ID,
+}
+
+OTEL_RESOURCE_APP_ID = "application.id"
+SPAN_TYPE_LLM = "llm"
+SPAN_TYPE_TOOL = "tool"
+SPAN_TYPE_CHAIN = "chain"
+SPAN_TYPE_OTHER = "other"
+
+AGENT_NAME = "gen_ai.agent.name"
+AGENT_ID = "gen_ai.agent.id"
+CONVERSATION_ID = "gen_ai.conversation.id"
+
+CONV_AGENT = "conversation_agent"
+PNS_AGENT = "pns_agent"
+QUERY_AGENT = "query_agent"
+
+## Performance Query Agent
+QUERY_AGENT = "query_agent"
+HAS_PERFORMANCE_SPAN = "has_performance_span"
+MODEL_PROJ_SPAN = "model_proj_span"
+START_END_DATE_SPAN = "start_end_date_span"
