@@ -161,6 +161,15 @@ if auth_status:
             - list all custom metrics for a model
             """
         )
+        st.write("FiddleBot can also query performance metrics for a model.")
+        st.markdown(
+            """
+            To query performance metrics, you need to provide the project name and model name.
+            You can also provide the start and end dates to query performance metrics for.
+            The dates should be in YYYY-MM-DD format.
+            The performance metrics will be displayed as a line chart.
+            """
+        )
 
     if constants.ST_MESSAGES not in st.session_state:
         st.session_state[constants.ST_MESSAGES] = []
