@@ -165,7 +165,7 @@ class FdlQueries:
     """Fiddler Queries Client"""
 
     def __init__(self):
-        self.MODEL_NAME = "gpt-4.1-mini"
+        self.MODEL_NAME = "gpt-4.1"
 
         self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
@@ -187,7 +187,7 @@ class FdlQueries:
         response = self.client.chat.completions.parse(
             model=self.MODEL_NAME,
             messages=modified_conversation_history,
-            max_tokens=constants.MAX_TOKENS,
+            max_completion_tokens=constants.MAX_TOKENS,
             response_format=HasPerformanceQuery,
         )
 
@@ -222,7 +222,7 @@ class FdlQueries:
         response = self.client.chat.completions.parse(
             model=self.MODEL_NAME,
             messages=modified_conversation_history,
-            max_tokens=constants.MAX_TOKENS,
+            max_completion_tokens=constants.MAX_TOKENS,
             response_format=ProjectModel,
         )
         with self.tracer.start_as_current_span(
@@ -253,7 +253,7 @@ class FdlQueries:
         response = self.client.chat.completions.parse(
             model=self.MODEL_NAME,
             messages=modified_conversation_history,
-            max_tokens=constants.MAX_TOKENS,
+            max_completion_tokens=constants.MAX_TOKENS,
             response_format=QueryDates,
         )
         with self.tracer.start_as_current_span(

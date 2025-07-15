@@ -25,6 +25,7 @@ load_dotenv()
 SERVER_PATH = "server_path"
 MODEL_4o_MINI = "gpt-4o-mini"
 MODEL_41_MINI = "gpt-4.1"
+MODEL_04_MINI = "o4-mini"
 MESSAGE = "message"
 FUNC_CALL = "function_call"
 
@@ -50,6 +51,14 @@ Use as few tools as possible to solve the task.
 Think through this step by step before giving your final output.
 Output only the plan, which should just be a list of steps and nothing more.
 Task to complete: {task}
+"""
+
+_FDL_PNS_MULTI_STEP_PROMPT = """
+You are given a task to solve. Generate a plan that is instrumental in solving the task.
+Think through this step by step before giving the plan. Keep the list of tools in mind. DO NOT MAKE ANY TOOL CALL.
+Tasks  {task}
+Having read the task, think through the steps to solve the task.
+Task : {task}
 """
 
 FDL_STEP_EXEC_PROMPT = (

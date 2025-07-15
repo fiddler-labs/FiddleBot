@@ -38,6 +38,7 @@ LANGFUSE_PUBLIC_KEY = "LANGFUSE_PUBLIC_KEY"
 
 OPENAI_API_KEY = "OPENAI_API_KEY"
 GPT_41_MINI = "gpt-4.1"
+O4_MINI = "o4-mini"
 MAX_TOKENS = 4096
 
 USER_INPUT_PROMPT = "User: "
@@ -216,7 +217,7 @@ class AsyncChatBot:
             response = await self.client.chat.completions.create(
                 model=self.model_name,
                 messages=conversation_history,
-                max_tokens=MAX_TOKENS,
+                max_completion_tokens=MAX_TOKENS,
                 tools=self.available_tools,
                 tool_choice="auto",
                 # session_id=self.session_id,
@@ -283,7 +284,7 @@ class AsyncChatBot:
                     response = await self.client.chat.completions.create(
                         model=self.model_name,
                         messages=conversation_history,
-                        max_tokens=MAX_TOKENS,
+                        max_completion_tokens=MAX_TOKENS,
                     )
                     ai_response = response.choices[0].message.content
                     llm_tool_response.set_attribute(
